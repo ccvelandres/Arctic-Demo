@@ -1,0 +1,4 @@
+[submodule "lib/arctic"]
+	path = lib/arctic
+	url = git@github.com:ccvelandres/arctic.git
+	branch = dev
