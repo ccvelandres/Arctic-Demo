@@ -92,40 +92,40 @@ int main(int arc, char **argv)
             SDL_RenderDrawLine(renderer, s.first.x, s.first.y, s.second.x, s.second.y);
         }
 
-        // Cast ray to each vertices
-        for (auto &v : segments)
-        {
-            Vector2F rayVector(mouse, v.first);
-            circleRGBA(renderer, v.first.x, v.first.y, 4, 255, 0, 0, 255);
+        // Cast ray to center of screen
+        Point2F rayOrigin(mouse);
+        Vector2F rayVector(rayOrigin, {originX, originY});
+        for (int i = 0; i < 8; i++) {
+            circleRGBA(renderer, mouse.x, mouse.y, 4, 255, 0, 0, 255);
+            const std::pair<Point2F, Point2F> *collisionSegment;
             float scaleFactor = 1;
-            for (auto &s : segments)
-            {
-                float res = math::getIntersection(
-                    mouse,
-                    rayVector,
-                    s.first,
-                    s.second);
-                if (res > 0 && res < scaleFactor)
-                {
+            bool collision = false;
+            for (auto &s : segments) {
+                float res = math::getIntersection(rayOrigin, rayVector, s.first, s.second);
+                if (res > 0 && res < scaleFactor) {
+                    collision = true;
                     scaleFactor = res;
-                    Point2F intersection(mouse.x + (rayVector.x * res),
-                                         mouse.y + (rayVector.y * res));
-                    printf("Intersection@ %f,%f\n\tscaleFactor: %f\n",
-                           intersection.x, intersection.y, res);
-                    circleRGBA(renderer, s.first.x, s.first.y, 4, 0, 255, 0, 255);
-                    circleRGBA(renderer, s.first.x, s.first.y, 4, 0, 255, 0, 255);
+                    collisionSegment = &s;
                 }
             }
+            if (collision) {
+                Point2F intersection(rayOrigin.x + (rayVector.x * scaleFactor),
+                                    rayOrigin.y + (rayVector.y * scaleFactor));
+                circleRGBA(renderer, intersection.x, intersection.y, 4, 255, 255, 255, SDL_ALPHA_OPAQUE);
+                SDL_SetRenderDrawColor(renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
+                SDL_RenderDrawLine(renderer, rayOrigin.x, rayOrigin.y, intersection.x, intersection.y);
 
-            // get lowest scalefactor
-            Point2F intersection(mouse.x + (rayVector.x * scaleFactor),
-                                 mouse.y + (rayVector.y * scaleFactor));
-            printf("scaleFactor %f\n",
-                   scaleFactor);
-            // SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
-            circleRGBA(renderer, v.first.x, v.first.y, 4, 255, 255, 255, SDL_ALPHA_OPAQUE);
-            SDL_SetRenderDrawColor(renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
-            SDL_RenderDrawLine(renderer, mouse.x, mouse.y, intersection.x, intersection.y);
+                rayVector = math::getReflection(rayVector, collisionSegment->first, collisionSegment->second);
+                rayOrigin = intersection;
+            }
+            else {
+                Point2F intersection(rayOrigin.x + (rayVector.x * scaleFactor),
+                                    rayOrigin.y + (rayVector.y * scaleFactor));
+                circleRGBA(renderer, intersection.x, intersection.y, 4, 255, 255, 255, SDL_ALPHA_OPAQUE);
+                SDL_SetRenderDrawColor(renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
+                SDL_RenderDrawLine(renderer, rayOrigin.x, rayOrigin.y, intersection.x, intersection.y);
+                break;
+            }
         }
 
         SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, SDL_ALPHA_OPAQUE);
