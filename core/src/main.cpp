@@ -5,7 +5,6 @@
 
 #include <arctic/vector.hpp>
 #include <arctic/collision.hpp>
-#include <arctic/math/algorithm.hpp>
 #include <arctic/profiler.hpp>
 
 constexpr int windowWidth = 800;
@@ -122,7 +121,7 @@ int main(int arc, char **argv)
                 SDL_SetRenderDrawColor(renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
                 SDL_RenderDrawLine(renderer, rayOrigin.x, rayOrigin.y, intersection.x, intersection.y);
                 Vector2F normal(collisionSegment->first, collisionSegment->second);
-                rayVector = algorithm::getReflection(rayVector, Vector2F(-normal.y, normal.x));
+                rayVector = Vector2F::reflect(rayVector, Vector2F(-normal.y, normal.x));
                 rayOrigin = intersection;
             }
             else {
