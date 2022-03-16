@@ -3,9 +3,10 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
 
-#include <math/point.hpp>
-#include <math/vector.hpp>
-#include <math/algorithm.hpp>
+#include <arctic/vector.hpp>
+#include <arctic/collision.hpp>
+#include <arctic/math/algorithm.hpp>
+#include <arctic/profiler.hpp>
 
 constexpr int windowWidth = 800;
 constexpr int windowHeight = 600;
@@ -27,7 +28,7 @@ int main(int arc, char **argv)
     bool isRunning = true;
     while (isRunning)
     {
-        Point2F mouse;
+        Vector2F mouse;
 
         SDL_Event e;
         while (SDL_PollEvent(&e))
@@ -59,7 +60,7 @@ int main(int arc, char **argv)
         // Target point
         circleRGBA(renderer, originX + 200, originY - 200, 2, 0, 255, 0, 255);
 
-        const std::vector<std::pair<Point2F, Point2F>> segments = {
+        const std::vector<std::pair<Vector2F, Vector2F>> segments = {
             // bounding box
             {{10, 10}, {windowWidth - 10, 10}},
             {{windowWidth - 10, 10}, {windowWidth - 10, windowHeight - 10}},
@@ -93,39 +94,48 @@ int main(int arc, char **argv)
         }
 
         // Cast ray to center of screen
-        Point2F rayOrigin(mouse);
-        Vector2F rayVector(rayOrigin, {originX, originY});
+        Vector2F rayOrigin(mouse);
+        Vector2F rayVector = Vector2F(rayOrigin, {originX, originY}).normalize();
+        static profiler::FunctionProfiler profiler;
+        profiler.start();
         for (int i = 0; i < 8; i++) {
             circleRGBA(renderer, mouse.x, mouse.y, 4, 255, 0, 0, 255);
-            const std::pair<Point2F, Point2F> *collisionSegment;
-            float scaleFactor = 1;
+            const std::pair<Vector2F, Vector2F> *collisionSegment;
+            float scaleFactor = MAXFLOAT;
+            Vector2F intersection;
             bool collision = false;
             for (auto &s : segments) {
-                float res = math::getIntersection(rayOrigin, rayVector, s.first, s.second);
-                if (res > 0 && res < scaleFactor) {
+                Vector2F vi;
+                float sf = MAXFLOAT;
+                bool res = collision::RaySegment(rayOrigin, rayVector, s.first, s.second, &vi, &sf);
+                if (res && sf < scaleFactor) {
                     collision = true;
-                    scaleFactor = res;
+                    scaleFactor = sf;
+                    intersection = vi;
                     collisionSegment = &s;
                 }
             }
             if (collision) {
-                Point2F intersection(rayOrigin.x + (rayVector.x * scaleFactor),
-                                    rayOrigin.y + (rayVector.y * scaleFactor));
+                // Vector2F intersection(rayOrigin.x + (rayVector.x * scaleFactor),
+                //                     rayOrigin.y + (rayVector.y * scaleFactor));
                 circleRGBA(renderer, intersection.x, intersection.y, 4, 255, 255, 255, SDL_ALPHA_OPAQUE);
                 SDL_SetRenderDrawColor(renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
                 SDL_RenderDrawLine(renderer, rayOrigin.x, rayOrigin.y, intersection.x, intersection.y);
-
-                rayVector = math::getReflection(rayVector, collisionSegment->first, collisionSegment->second);
+                Vector2F normal(collisionSegment->first, collisionSegment->second);
+                rayVector = algorithm::getReflection(rayVector, Vector2F(-normal.y, normal.x));
                 rayOrigin = intersection;
             }
             else {
-                Point2F intersection(rayOrigin.x + (rayVector.x * scaleFactor),
+                Vector2F intersection(rayOrigin.x + (rayVector.x * scaleFactor),
                                     rayOrigin.y + (rayVector.y * scaleFactor));
                 circleRGBA(renderer, intersection.x, intersection.y, 4, 255, 255, 255, SDL_ALPHA_OPAQUE);
                 SDL_SetRenderDrawColor(renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
                 SDL_RenderDrawLine(renderer, rayOrigin.x, rayOrigin.y, intersection.x, intersection.y);
                 break;
             }
+        }
+        if (profiler.stop()) {
+            std::cout << "Reflection update time: " << profiler.getMax() << std::endl;
         }
 
         SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, SDL_ALPHA_OPAQUE);
