@@ -55,7 +55,11 @@
 			"streambuf": "cpp",
 			"cinttypes": "cpp",
 			"typeinfo": "cpp",
-			"thread": "cpp"
+			"thread": "cpp",
+			"codecvt": "cpp",
+			"condition_variable": "cpp",
+			"iomanip": "cpp",
+			"mutex": "cpp"
 		},
 		"lldb.displayFormat": "auto",
 		"lldb.dereferencePointers": true,
