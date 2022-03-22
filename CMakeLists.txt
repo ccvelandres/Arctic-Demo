@@ -28,5 +28,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE SDL2_gfx)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL)
 target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
 
+set(ARCTIC_STATIC_LIB ON CACHE INTERNAL "" FORCE)
 add_subdirectory(lib/arctic)
 target_link_libraries(${PROJECT_NAME} PRIVATE arctic)
