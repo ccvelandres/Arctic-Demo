@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.10)
 
 get_filename_component(PROJECT_FOLDER_NAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 string(REPLACE " " "_" PROJECT_FOLDER_NAME ${PROJECT_FOLDER_NAME})
@@ -11,7 +11,7 @@ find_package(OpenGL REQUIRED)
 find_package(Threads REQUIRED)
 
 set(CMAKE_C_STANDARD 11) # Requires C11 standard
-set(CMAKE_CXX_STANDARD 20) # Requires C++20 standard
+set(CMAKE_CXX_STANDARD 17) # Requires C++20 standard
 
 file(GLOB_RECURSE SRC_C_CORE ${CMAKE_SOURCE_DIR}/core/src/*.c)
 file(GLOB_RECURSE SRC_CPP_CORE ${CMAKE_SOURCE_DIR}/core/src/*.cpp)

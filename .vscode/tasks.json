@@ -21,8 +21,7 @@
             "args": [
                 "--build", "${workspaceFolder}/build",
                 "--config", "Debug",
-                "--target", "all",
-                "--parallel"
+                "--target", "all"
             ],
             "problemMatcher": [
                 "$gcc"
