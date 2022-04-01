@@ -7,11 +7,11 @@
                 "/usr/include/SDL2/"
             ],
             "defines": [
-
+                "BUILD_WITH_EASY_PROFILER"
             ],
             "compilerPath": "/usr/bin/g++",
-            "cStandard": "gnu17",
-            "cppStandard": "gnu++14",
+            "cStandard": "c99",
+            "cppStandard": "c++17",
             "intelliSenseMode": "linux-gcc-x64"
         }
     ],

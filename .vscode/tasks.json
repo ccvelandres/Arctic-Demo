@@ -60,6 +60,14 @@
                 "CMake Configure : Release"
             ],
             "dependsOrder": "sequence"
+        },
+        {
+            "label": "Launch Profiler",
+            "command": "${workspaceFolder}/build/lib/arctic/lib/easy_profiler/bin/profiler_gui",
+            "dependsOn": [
+                "CMake Build : Debug"
+            ],
+            "dependsOrder": "sequence"
         }
     ]
 }
